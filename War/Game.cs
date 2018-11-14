@@ -6,23 +6,24 @@ namespace War
 {
     public class Game
     {
-        private string[] playerNames = { "Computer", "Human" };
+        private string[] playerNames;
         private List<Player> players = new List<Player>();
-        private Deck startingDeck;
         private int turnCount = 0;
         public bool gameEnd = false;
 
         private List<Card> warCards = new List<Card>();
 
-        public Game()
+        public Game(string[] names)
         {
+            playerNames = names;
+
             Console.Clear();
             Console.WriteLine("Starting a new game\n");
             // Instantiate players
             InitializePlayers(playerNames);
 
             // Build a starting deck
-            startingDeck = BuildDeck();
+            Deck startingDeck = BuildDeck();
 
             // Divide the deck between players
             players = divideDeck(startingDeck, players);
@@ -47,6 +48,9 @@ namespace War
                 if (!hidden) 
                 {
                      Console.WriteLine("Player {0} drew a {1} of {2}", player.GetName(), activeCards[players.IndexOf(player)].GetPrintValue(), activeCards[players.IndexOf(player)].suit);
+                } else
+                {
+                    Console.WriteLine("Player {0} drew a face down card", player.GetName());
                 }
             }
 
@@ -136,7 +140,7 @@ namespace War
         private void EndGame(Player losingPlayer) 
         {
             Console.WriteLine("*********** GAME OVER - {0} lost  ***********", losingPlayer.GetName());
-            Console.WriteLine("If you would like to play again, press Space");
+            Console.WriteLine("If you would like to play again, press Enter/Return");
 
             gameEnd = true;
         }
@@ -161,7 +165,7 @@ namespace War
         private Deck BuildDeck() {
             // Instantiate a new deck
             Deck deck = new Deck();
-            // Create a brand new deck containing all cards
+            // Create a brand new deck containing all 52 cards
             deck.CreateStartingDeck();
             // Shuffle the new deck
             deck.Shuffle();

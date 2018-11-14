@@ -7,7 +7,7 @@ namespace War
         static void Main(string[] args)
         {
             // Generate a new instance of the game
-            Game game = new Game();
+            Game game = new Game(new string[2]{"Cylon", "Meatbag"});
 
             // Wait for spacebar to continue the game
             Console.WriteLine("Press Space to draw a card");
@@ -17,15 +17,20 @@ namespace War
                 {
                     if (Console.ReadKey(true).Key == ConsoleKey.Spacebar)
                     {
-                        if (game.gameEnd)
+                        if (!game.gameEnd)
                         {
-                            // If game has ended, start a new game
-                            game = new Game();
-                        } else {
                             // Execute a new turn
                             game.NewTurn();
                         }
+                    } else if (Console.ReadKey(true).Key == ConsoleKey.Enter) 
+                    {
+                        if (game.gameEnd)
+                        {
+                            // If game has ended, start a new game
+                            game = new Game(new string[2] { "Cylon", "Meatbag" });
+                        }
                     }
+
                 }
             } while (Console.ReadKey(true).Key != ConsoleKey.Escape);
         }
