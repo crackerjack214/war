@@ -20,11 +20,13 @@ namespace War
             return drawDeck.GetCount() + scoreDeck.GetCount();
         }
 
+        // Return the player's name
         public string GetName() 
         {
             return name;
         }
 
+        // Draw a card from the deck if there are any cards left
         public Card DrawCard() 
         {
             if (drawDeck.GetCount() > 0)
