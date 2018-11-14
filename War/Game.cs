@@ -1,9 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace War
 {
+    // Game class contains all of the game mechanics such as 
+    // turn taking, scoring, game starting, and game ending
     public class Game
     {
         private string[] playerNames;
@@ -13,31 +14,38 @@ namespace War
 
         private List<Card> warCards = new List<Card>();
 
+        // Initialize the game
         public Game(string[] names)
         {
-            playerNames = names;
-
             Console.Clear();
             Console.WriteLine("Starting a new game\n");
-            // Instantiate players
+
+            // Set player names
+            playerNames = names;
+
+            // Instantiate player objects for each player
             InitializePlayers(playerNames);
 
-            // Build a starting deck
-            Deck startingDeck = BuildDeck();
+            // Build a starting deck and shuffle it
+            Deck startingDeck = new Deck();
+            startingDeck.CreateStartingDeck();
 
             // Divide the deck between players
-            players = divideDeck(startingDeck, players);
+            players = DivideDeck(startingDeck, players);
         }
 
-        private Card[] drawCards(bool hidden = false)
+        // Draw a card from each player, hidden is used for face down cards
+        private Card[] DrawCards(bool facedown = false)
         {
+            // Initialize an array of cards with length equal to the number of players
             Card[] activeCards = new Card[players.Count];
 
-            // Draw cards from both players
+            // Draw cards from each player
             foreach (Player player in players)
             {
                 activeCards[players.IndexOf(player)] = player.DrawCard();
 
+                // If player has no more cards, they lose
                 if (player.GetScore() == 0)
                 {
                     EndGame(player);
@@ -45,7 +53,8 @@ namespace War
                     return null;
                 }
 
-                if (!hidden) 
+                // Handle console output based on face down or face up
+                if (!facedown) 
                 {
                      Console.WriteLine("Player {0} drew a {1} of {2}", player.GetName(), activeCards[players.IndexOf(player)].GetPrintValue(), activeCards[players.IndexOf(player)].suit);
                 } else
@@ -57,21 +66,26 @@ namespace War
             return activeCards;
         }
 
+        // Execute a new turn of players drawing cards and potentially going to war
         public void NewTurn() 
         {
             turnCount++;
+
             Console.Clear();
             Console.WriteLine("Turn #{0}", turnCount);
 
-            Card[] newCards = drawCards();
+            // Draw cards for each player
+            Card[] newCards = DrawCards();
             if (newCards != null)
             {
-                // Check for winning player or go into War mode
+                // Check for winning player
+                // TODO Possibly add support for more than 2 players here
                 int outcome = newCards[0].IsHigherThan(newCards[1]);
 
                 // Assign winning player the cards, -1 indicates tie and War happens
                 if (outcome != -1)
                 {
+                    // This is the winning player
                     Player player = players[outcome] as Player;
 
                     // Assign winner the cards
@@ -84,21 +98,28 @@ namespace War
                 {
                     // Enter war mode
                     bool warStatus = true;
+
+                    // Place previous played cards into a pot which will ultimately go to the winner of the War
                     List<Card> potCards = new List<Card>(newCards);
 
                     Console.WriteLine("War!");
+
+                    // Keep looping through a round of War as long as faceup cards are equal
                     while (warStatus)
                     {
                         // Draw the face down cards
-                        Card[] hiddenCards = drawCards(true);
-                        if (hiddenCards != null)
+                        Card[] facedownCards = DrawCards(true);
+
+                        // Only continue as long as there are facedown cards available
+                        if (facedownCards != null)
                         {
                             // Add face down cards to the pot
-                            potCards.AddRange(hiddenCards);
+                            potCards.AddRange(facedownCards);
 
-                            // Draw the face up cards
-                            Card[] counterCards = drawCards();
-
+                            // Draw the faceup cards
+                            Card[] counterCards = DrawCards();
+                           
+                            // Only continue as long as there are faceup cards available
                             if (counterCards != null)
                             {
                                 // Add the face up cards to the pot
@@ -112,31 +133,37 @@ namespace War
                                 {
                                     warStatus = false;
 
+                                    // Winning player
                                     Player player = players[warOutcome] as Player;
 
                                     Console.WriteLine("Player {0} won {1} cards", player.GetName(), potCards.Count);
+
                                     // Assign winner the cards
                                     foreach (Card card in potCards)
                                     {
                                         player.scoreDeck.AddCard(card);
                                     }
                                 }
-                            } else {
+                            } else 
+                            {
                                 return;
                             }
-                        } else {
+                        } else 
+                        {
                             return;
                         }
                     }
                 }
             }
 
+            // Print number of cards each player has left after the turn
             foreach (Player player in players)
             {
                 Console.WriteLine("Player {0} has {1} cards", player.GetName(), player.GetScore());
             }
         }
 
+        // Output the loser and trigger game end
         private void EndGame(Player losingPlayer) 
         {
             Console.WriteLine("*********** GAME OVER - {0} lost  ***********", losingPlayer.GetName());
@@ -146,7 +173,7 @@ namespace War
         }
 
         // Divide the deck between all players
-        private static List<Player> divideDeck(Deck deck, List<Player> allPlayers) 
+        private static List<Player> DivideDeck(Deck deck, List<Player> allPlayers) 
         {
             // Split provided deck into two
             Deck[] playerDecks = Deck.DivideDeck(deck, allPlayers.Count);
@@ -160,17 +187,6 @@ namespace War
             }
 
             return allPlayers;
-        }
-
-        private Deck BuildDeck() {
-            // Instantiate a new deck
-            Deck deck = new Deck();
-            // Create a brand new deck containing all 52 cards
-            deck.CreateStartingDeck();
-            // Shuffle the new deck
-            deck.Shuffle();
-
-            return deck;
         }
 
         // Create new player objects for each name provided
