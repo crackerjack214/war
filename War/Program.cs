@@ -15,22 +15,25 @@ namespace War
             {
                 while (!Console.KeyAvailable)
                 {
-                    if (Console.ReadKey(true).Key == ConsoleKey.Spacebar)
+                    switch(Console.ReadKey(true).Key)
                     {
-                        if (!game.gameEnd)
-                        {
-                            // Execute a new turn
-                            game.NewTurn();
-                        }
-                    } else if (Console.ReadKey(true).Key == ConsoleKey.Enter) 
-                    {
-                        if (game.gameEnd)
-                        {
-                            // If game has ended, start a new game
-                            game = new Game(new string[2] { "Cylon", "Meatbag" });
-                        }
+                        case ConsoleKey.Spacebar:
+                            if (!game.gameEnd)
+                            {
+                                // Execute a new turn
+                                game.NewTurn();
+                            }
+                            break;
+                        case ConsoleKey.Enter:
+                            if (game.gameEnd)
+                            {
+                                // If game has ended, start a new game
+                                game = new Game(new string[2] { "Cylon", "Meatbag" });
+                            }
+                            break;
+                        default:
+                            break;
                     }
-
                 }
             } while (Console.ReadKey(true).Key != ConsoleKey.Escape);
         }
